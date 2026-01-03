@@ -1,46 +1,55 @@
 # Student Management System
 
-A simple Python program to manage student information.
+A Python program to manage student information with persistent file storage.
 
 ## Features
 
-- Add new students
-- View all students
-- Store student data (name, ID, grade)
-- Simple command-line interface
+- Add new students with validation (no duplicate IDs)
+- View all students in a formatted table
+- Delete students by ID
+- Auto-save data to file after each operation
+- Load data from file when program starts
 
 ## How to Run
-
-1. Make sure Python is installed
-2. Open terminal in the project folder
-3. Run this command:
 ```bash
 python src/main.py
 ```
 
-4. Choose an option from the menu:
-   - 1: Add a student
-   - 2: View all students
-   - 3: Exit
+## Menu Options
 
-## Example
-```
---- Student Management ---
-1. Add Student
-2. View Students
-3. Exit
+1. **Add Student** - Enter ID, name, and grade
+2. **View Students** - Display all students in table format
+3. **Delete Student** - Remove a student by ID
+4. **Exit** - Close the program
 
-Choose (1-3): 1
-Enter student name: John
-Enter student ID: 101
-Enter grade: 95
-Student John added!
-```
+## Data Storage
+
+- Student data is saved in `student_data.txt`
+- Format: `ID,Name,Grade`
+- Data persists between sessions
 
 ## Technologies Used
 
 - Python 3.11
-- Basic data structures (lists, dictionaries)
+- File I/O (reading/writing text files)
+- Data structures (lists, dictionaries)
+- Input validation
+
+## Example
+```
+=== STUDENT SYSTEM MENU ===
+1. Add Student
+2. View Students
+3. Delete Student
+4. Exit
+
+Enter your choice (1-4): 1
+--- Add New Student ---
+Enter Student ID: 101
+Enter Student Name: John Doe
+Enter Student Grade: 95
+[Success] Student John Doe added.
+```
 
 ## Author
 
@@ -51,14 +60,3 @@ mffffwbg-bit
 MIT
 ```
 
-**Yapıştır ve Cmd+S ile kaydet.**
-
----
-
-**Bunu yaptıktan sonra GitHub'a yükle:**
-
-Terminal'de:
-```
-git add .
-git commit -m "Add README documentation"
-git push
