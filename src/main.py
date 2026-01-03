@@ -1,127 +1,160 @@
 # ==========================================
-# Project: Student Management System
-# Level: Python Fundamentals (University Year 1)
-# Description: A simple program to manage student grades and save them to a file.
+# Project: Student Management System (OOP Version)
+# Features: CRUD, Search, File I/O, Class Structure
 # ==========================================
 
 import os
 
-# File to save data
 FILE_NAME = "student_data.txt"
-students = []
 
-def load_data():
-    """Loads students from the text file into the list."""
-    # Check if file exists first
-    if os.path.exists(FILE_NAME):
+# 1. CLASS: Tek bir öğrenciyi temsil eder
+class Student:
+    def __init__(self, student_id, name, grade):
+        self.student_id = student_id
+        self.name = name
+        self.grade = grade
+
+    def __str__(self):
+        # Öğrenciyi yazdırdığımızda nasıl görüneceği
+        return f"{self.student_id:<10} {self.name:<20} {self.grade:<10}"
+
+    def to_file_format(self):
+        # Dosyaya kaydederken kullanılacak format
+        return f"{self.student_id},{self.name},{self.grade}\n"
+
+# 2. MANAGER CLASS: Tüm listeyi ve işleri yönetir
+class StudentManager:
+    def __init__(self):
+        self.students = []
+        self.load_data()
+
+    def load_data(self):
+        if os.path.exists(FILE_NAME):
+            try:
+                with open(FILE_NAME, "r") as file:
+                    self.students = []
+                    for line in file:
+                        parts = line.strip().split(",")
+                        if len(parts) == 3:
+                            # Dosyadan okuyup "Student" nesnesine çeviriyoruz
+                            new_student = Student(parts[0], parts[1], parts[2])
+                            self.students.append(new_student)
+                print(f"[System] {len(self.students)} students loaded.")
+            except Exception:
+                print("[Error] Could not load data.")
+        else:
+            print("[System] No data file found. Starting fresh.")
+
+    def save_data(self):
         try:
-            with open(FILE_NAME, "r") as file:
-                for line in file:
-                    # Data format in file: ID,Name,Grade
-                    parts = line.strip().split(",")
-                    if len(parts) == 3:
-                        student = {
-                            "id": parts[0], 
-                            "name": parts[1], 
-                            "grade": parts[2]
-                        }
-                        students.append(student)
-            print(f"[System] Loaded {len(students)} students from file.\n")
-        except Exception as e:
-            print("[Error] Could not load data.\n")
-    else:
-        print("[System] No data file found. Starting new list.\n")
+            with open(FILE_NAME, "w") as file:
+                for student in self.students:
+                    file.write(student.to_file_format())
+            print("[System] Data saved successfully!")
+        except Exception:
+            print("[Error] Could not save data.")
 
-def save_data():
-    """Saves the current student list to the text file."""
-    try:
-        with open(FILE_NAME, "w") as file:
-            for s in students:
-                # Saving as: ID,Name,Grade
-                line = f"{s['id']},{s['name']},{s['grade']}\n"
-                file.write(line)
-        print("[System] Data saved successfully!")
-    except Exception as e:
-        print("[Error] Could not save data.\n")
-
-def add_student():
-    """Adds a new student to the list."""
-    print("--- Add New Student ---")
-    s_id = input("Enter Student ID: ")
-    
-    # Simple validation: Check if ID already exists
-    for s in students:
-        if s['id'] == s_id:
-            print("[Error] This ID already exists! Try again.\n")
+    def add_student(self):
+        print("\n--- Add New Student ---")
+        s_id = input("ID: ")
+        
+        # ID Kontrolü (Aynı ID var mı?)
+        if self.find_student_by_id(s_id):
+            print("[Error] This ID already exists!")
             return
 
-    name = input("Enter Student Name: ")
-    grade = input("Enter Student Grade: ")
-
-    # Create dictionary
-    new_student = {"id": s_id, "name": name, "grade": grade}
-    students.append(new_student)
-    
-    # Auto-save after adding
-    save_data()
-    print(f"[Success] Student {name} added.\n")
-
-def view_students():
-    """Prints all students in a readable format."""
-    print("--- Student List ---")
-    if len(students) == 0:
-        print("No students found.")
-    else:
-        print(f"{'ID':<10} {'Name':<20} {'Grade':<10}")
-        print("-" * 40)
-        for s in students:
-            print(f"{s['id']:<10} {s['name']:<20} {s['grade']:<10}")
-    print("-" * 40 + "\n")
-
-def delete_student():
-    """Deletes a student by ID."""
-    print("--- Delete Student ---")
-    s_id = input("Enter ID to delete: ")
-    
-    found = False
-    for i in range(len(students)):
-        if students[i]['id'] == s_id:
-            removed = students.pop(i)
-            found = True
-            print(f"[Success] Student {removed['name']} deleted.")
-            save_data() # Auto-save after deleting
-            break
-            
-    if not found:
-        print("[Error] Student ID not found.\n")
-
-def menu():
-    """Main program loop."""
-    # Load data when program starts
-    load_data()
-    
-    while True:
-        print("=== STUDENT SYSTEM MENU ===")
-        print("1. Add Student")
-        print("2. View Students")
-        print("3. Delete Student")
-        print("4. Exit")
+        name = input("Name: ")
+        grade = input("Grade: ")
         
-        choice = input("Enter your choice (1-4): ")
-        print() # Empty line for look
+        # Yeni nesne oluştur ve listeye ekle
+        new_student = Student(s_id, name, grade)
+        self.students.append(new_student)
+        self.save_data()
+        print(f"[Success] {name} added.")
 
-        if choice == '1':
-            add_student()
-        elif choice == '2':
-            view_students()
-        elif choice == '3':
-            delete_student()
-        elif choice == '4':
-            print("Exiting program. Goodbye!")
-            break
+    def search_student(self):
+        print("\n--- Search Student ---")
+        keyword = input("Enter ID or Name to search: ").lower()
+        
+        found_students = []
+        for s in self.students:
+            # Hem isme hem ID'ye bakar
+            if keyword in s.student_id.lower() or keyword in s.name.lower():
+                found_students.append(s)
+
+        if found_students:
+            print(f"\n{'ID':<10} {'Name':<20} {'Grade':<10}")
+            print("-" * 40)
+            for s in found_students:
+                print(s) # __str__ fonksiyonunu kullanır
         else:
-            print("Invalid choice! Please try again.\n")
+            print("[Result] No matching students found.")
 
-# Start the program
+    def update_grade(self):
+        print("\n--- Update Grade ---")
+        s_id = input("Enter Student ID: ")
+        
+        student = self.find_student_by_id(s_id)
+        if student:
+            print(f"Current info: {student}")
+            new_grade = input("Enter New Grade: ")
+            student.grade = new_grade
+            self.save_data()
+            print("[Success] Grade updated.")
+        else:
+            print("[Error] Student not found.")
+
+    def delete_student(self):
+        print("\n--- Delete Student ---")
+        s_id = input("Enter ID to delete: ")
+        
+        student = self.find_student_by_id(s_id)
+        if student:
+            self.students.remove(student)
+            self.save_data()
+            print("[Success] Student deleted.")
+        else:
+            print("[Error] Student not found.")
+
+    def view_all(self):
+        print("\n--- All Students ---")
+        if not self.students:
+            print("List is empty.")
+        else:
+            print(f"{'ID':<10} {'Name':<20} {'Grade':<10}")
+            print("-" * 40)
+            for s in self.students:
+                print(s)
+
+    # Yardımcı Fonksiyon (Kod tekrarını önlemek için)
+    def find_student_by_id(self, s_id):
+        for s in self.students:
+            if s.student_id == s_id:
+                return s
+        return None
+
+# 3. MAIN: Programın başladığı yer
+def main():
+    manager = StudentManager() # Manager sınıfını başlat
+
+    while True:
+        print("\n=== UNI STUDENT SYSTEM ===")
+        print("1. Add Student")
+        print("2. Search Student") # İstenen özellik
+        print("3. Update Grade")   # İstenen özellik
+        print("4. Delete Student")
+        print("5. View All")
+        print("6. Exit")
+        
+        choice = input("Choice: ")
+
+        if choice == '1': manager.add_student()
+        elif choice == '2': manager.search_student()
+        elif choice == '3': manager.update_grade()
+        elif choice == '4': manager.delete_student()
+        elif choice == '5': manager.view_all()
+        elif choice == '6': break
+        else: print("Invalid choice.")
+
 if __name__ == "__main__":
-    menu()
+    main()
